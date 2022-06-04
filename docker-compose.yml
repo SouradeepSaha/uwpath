@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: db
+    command: postgres -c password_encryption=md5
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./conf/SQLConfig.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - db:/var/lib/postgresql/data
+    networks:
+      - dbNetwork
+
+  backend:
+    build: ./Backend
+    command: bash -c "
+      python manage.py migrate
+      && python manage.py runserver 0.0.0.0:8000
+      "
+    ports:
+      - "8000:8000"
+    networks:
+      - dbNetwork
+      - backendNetwork
+    depends_on:
+      - db
+
+  web:
+    build: ./Frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - backendNetwork
+
+
+networks:
+  dbNetwork:
+    driver: bridge
+  backendNetwork:
+    driver: bridge
+
+volumes:
+  db:
