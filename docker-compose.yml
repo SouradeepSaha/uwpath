@@ -47,6 +47,18 @@ services:
     networks:
       - backendNetwork
 
+  dataparsing:
+    build: ./DataParsing
+    command: /bin/bash PopulateDatabase.sh
+    volumes:
+      - .:/code
+    depends_on:
+      - db
+    networks:
+      - dbNetwork
+    environment:
+      - UWPATH_ENVIRONMENT=docker
+
 
 networks:
   dbNetwork:
