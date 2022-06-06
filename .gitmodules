@@ -1,3 +1,9 @@
 [submodule "Frontend"]
 	path = Frontend
 	url = https://github.com/SouradeepSaha/Frontend.git
+[submodule "DataParsing"]
+	path = DataParsing
+	url = https://github.com/SouradeepSaha/DataParsing.git
+[submodule "Backend"]
+	path = Backend
+	url = https://github.com/SouradeepSaha/Backend.git
