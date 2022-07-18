@@ -27,7 +27,8 @@ services:
     build: ./Backend
     command: bash -c "
       python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8000
+      python manage.py collectstatic --noinput &&
+      gunicorn uwpath_backend.wsgi -w 3 --bind 0.0.0.0:8000
       "
     ports:
       - "8000:8000"
@@ -38,7 +39,7 @@ services:
       - db
     environment:
       - SECRET_KEY=7ldnlu_gz*&vx&=4)q3#74ih@nzx*owgeu^=*katjqpbb-s1sk
-      - DJANGO_SETTINGS_MODULE=uwpath_backend.dev
+      - DJANGO_SETTINGS_MODULE=uwpath_backend.int
 
 
   web:
