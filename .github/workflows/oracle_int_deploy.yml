@@ -1,0 +1,31 @@
+name: oracle-docker-deploy-int
+on: 
+  push:
+    branches:
+      - int
+jobs:
+  my-instances:
+    runs-on: ubuntu-latest
+    name: Login to OCIR
+    env:
+      OCI_CLI_USER: ${{ secrets.OCI_CLI_USER }}
+      OCI_CLI_TENANCY: ${{ secrets.OCI_CLI_TENANCY }}
+      OCI_CLI_FINGERPRINT: ${{ secrets.OCI_CLI_FINGERPRINT }}
+      OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_CLI_KEY_CONTENT }}
+      OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
+    steps:
+      - name: Login to OCIR
+        uses: oracle-actions/login-ocir@v1
+        id: login-ocir
+        with:
+          auth_token: ${{ secrets.OCIR_AUTH_TOKEN }}
+
+      - name: Get private OCIR repository
+        uses: oracle-actions/get-ocir-repository@v1
+        id: get-ocir-repository
+        with:
+          compartment: ${{ secrets.OCI_COMPARTMENT }}
+          name: 'gh-action/alpine'
+
+      - name: Push the image to OCIR
+        run: docker push "${{ steps.get-ocir-repository.outputs.repo_path }}:latest"
