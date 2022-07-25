@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - int
+      - UW-7-pipeline
 jobs:
   my-instances:
     runs-on: ubuntu-latest
