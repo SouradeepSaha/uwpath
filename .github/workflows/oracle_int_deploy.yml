@@ -16,7 +16,7 @@ jobs:
       OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
     steps:
       - name: Login to OCIR
-        uses: oracle-actions/login-ocir@v2
+        uses: oracle-actions/login-ocir@v1.0
         id: login-ocir
         with:
           auth_token: ${{ secrets.OCIR_AUTH_TOKEN }}
@@ -30,3 +30,10 @@ jobs:
 
       - name: Push the image to OCIR
         run: docker push "${{ steps.get-ocir-repository.outputs.repo_path }}:latest"
+        
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3.1.0
+        with:
+          file: ./docker-compose.yml
+          push: true
+          
