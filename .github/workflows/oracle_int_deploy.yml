@@ -22,7 +22,7 @@ jobs:
           auth_token: ${{ secrets.OCIR_AUTH_TOKEN }}
 
       - name: Get private OCIR repository
-        uses: oracle-actions/get-ocir-repository@v1
+        uses: oracle-actions/get-ocir-repository@v1.0
         id: get-ocir-repository
         with:
           compartment: ${{ secrets.OCI_COMPARTMENT }}
