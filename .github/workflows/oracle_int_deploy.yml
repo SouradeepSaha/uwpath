@@ -16,7 +16,7 @@ jobs:
       OCI_CLI_REGION: ${{ secrets.OCI_CLI_REGION }}
     steps:
       - name: Login to OCIR
-        uses: oracle-actions/login-ocir@387e0608a8dd1c0aafc18b0f358e9b7c9a3ca41d
+        uses: oracle-actions/login-ocir@v1.0
         id: login-ocir
         with:
           auth_token: ${{ secrets.OCIR_AUTH_TOKEN }}
