@@ -2,15 +2,24 @@ version: '3'
 
 services:
   db:
-    image: container-registry.oracle.com/database/enterprise:19.3.0.0
+    image: postgres
     restart: always
     environment:
-      ORACLE_PWD: password
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/db_data/
+    command: postgres -c password_encryption=md5
     ports:
-      - "1521:1521"
+      - "5432:5432"
     healthcheck:
-      test: [ "CMD", "/opt/oracle/checkDBStatus.sh"]
-      interval: 2s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./Database/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+      - db:/var/lib/postgresql/data
     networks:
       - dbNetwork
 
@@ -18,22 +27,19 @@ services:
     build: ./Backend
     command: bash -c "
       python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8000
+      python manage.py collectstatic --noinput &&
+      gunicorn uwpath_backend.wsgi -w 3 --bind 0.0.0.0:8000
       "
     ports:
       - "8000:8000"
     networks:
       - dbNetwork
       - backendNetwork
-    # volumes:
-    #   - ./Wallet_uwpathparallel:/code/Wallet_uwpathparallel
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     environment:
       - SECRET_KEY=7ldnlu_gz*&vx&=4)q3#74ih@nzx*owgeu^=*katjqpbb-s1sk
-      - DJANGO_SETTINGS_MODULE=uwpath_backend.dev
-    #   - TNS_ADMIN=/code/Wallet_uwpathparallel
+      - DJANGO_SETTINGS_MODULE=uwpath_backend.int
 
 
   web:
@@ -49,17 +55,14 @@ services:
   dataparsing:
     build: ./DataParsing
     command: /bin/bash DataParsing/PopulateDatabase.sh
-    # volumes:
-    #   - .:/code
-    #   - ./Wallet_uwpathparallel:/code/Wallet_uwpathparallel
+    volumes:
+      - .:/code
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     networks:
       - dbNetwork
     environment:
-      - UWPATH_ENVIRONMENT=docker
-      # - TNS_ADMIN=/code/Wallet_uwpathparallel
+      - UWPATH_ENVIRONMENT=int
 
 
 networks:
@@ -67,3 +70,6 @@ networks:
     driver: bridge
   backendNetwork:
     driver: bridge
+
+volumes:
+  db:
