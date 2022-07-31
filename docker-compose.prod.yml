@@ -61,7 +61,7 @@ services:
     networks:
       - dbNetwork
     environment:
-      - UWPATH_ENVIRONMENT=docker
+      - UWPATH_ENVIRONMENT=prod
 
 
 networks:
